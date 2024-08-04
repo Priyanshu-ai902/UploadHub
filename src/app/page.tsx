@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { LoaderCircle } from "lucide-react";
 
 
 const formSchema = z.object({
@@ -38,6 +40,7 @@ const formSchema = z.object({
 })
 
 export default function Home() {
+  const { toast } = useToast();
   const organization = useOrganization();
   const user = useUser()
   const generateUploadUrl = useMutation(api.files.generateUploadUrl)
@@ -66,15 +69,32 @@ export default function Home() {
     });
     const { storageId } = await result.json()
 
+    try {
+      await createFile({
+        name: values.title,
+        fileId: storageId,
+        orgId
+      });
 
-    await createFile({
-      name: values.title,
-      fileId: storageId,
-      orgId
-    });
+      form.reset();
+      setIsFileDialogOpen(false)
 
-    form.reset();
-    setIsFileDialogOpen(false)
+      toast({
+        variant: "default",
+        title: "File Uploaded",
+        description: "Now everyone can view your file",
+        className: "bg-purple-500 text-black"
+      })
+    } catch (err) {
+      toast({
+        variant: "default",
+        title: "Something went wrong",
+        description: "Your file is not uploaded ,try again",
+        className: "bg-red-500 text-white"
+      })
+    }
+
+
   }
 
   let orgId: string | undefined = undefined;
@@ -94,7 +114,13 @@ export default function Home() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Your Files</h1>
 
-        <Dialog open={isFileDialogOpen} onOpenChange={setIsFileDialogOpen}>
+        <Dialog
+          open={isFileDialogOpen}
+          onOpenChange={(isOpen) => {
+            setIsFileDialogOpen(isOpen);
+            form.reset();
+          }}
+        >
           <DialogTrigger asChild>
 
             <Button onClick={() => {
@@ -145,7 +171,13 @@ export default function Home() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit">Submit</Button>
+                <Button type="submit"
+                  disabled={form.formState.isSubmitting}
+                  className="flex gap-1">
+                    {form.formState.isSubmitting&& (
+                      <LoaderCircle className="h-4 w-4 animate-spin"/>
+                    )}
+                    Submit</Button>
               </form>
             </Form>
 

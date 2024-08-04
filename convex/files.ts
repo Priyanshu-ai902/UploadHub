@@ -52,7 +52,7 @@ export const createFile = mutation({
         await ctx.db.insert("files", {
             name: args.name,
             orgId: args.orgId,
-            fileId:args.fileId,
+            fileId: args.fileId,
         });
     },
 });
