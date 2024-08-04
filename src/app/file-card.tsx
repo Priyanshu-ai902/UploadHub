@@ -13,7 +13,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreVerticalIcon, Trash2 } from "lucide-react";
+import { FileText, GanttChartSquare, ImageIcon, MoreVerticalIcon, Trash2 } from "lucide-react";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -24,7 +24,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useToast } from "@/components/ui/use-toast";
@@ -82,19 +82,29 @@ function FileCardActions({ file }: { file: Doc<"files"> }) {
 
 
 export function FileCard({ file }: { file: Doc<"files"> }) {
+
+
+
+    const typeIcons = {
+        "image": <ImageIcon />,
+        "pdf": <FileText />,
+        "csv": <GanttChartSquare />,
+    } as Record<Doc<"files">["type"], ReactNode>;
+
     return (
         <Card>
             <CardHeader className="relative">
-                <CardTitle>{file.name}
+                <CardTitle className="flex gap-2">
+                    <div className="flex justify-center">
+                    {typeIcons[file.type]}
+                    </div>{" "}
+                    {file.name}
                 </CardTitle>
                 <div className="absolute top-2 right-2">
                     <FileCardActions file={file} />
                 </div>
-
-                {/* <CardDescription>Card Description</CardDescription> */}
             </CardHeader>
             <CardContent>
-                <p>Card Content</p>
             </CardContent>
             <CardFooter>
                 <Button>Download</Button>

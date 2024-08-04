@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useOrganization, useUser } from "@clerk/nextjs";
-import { useMutation} from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import {
     Dialog,
@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input"
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { LoaderCircle } from "lucide-react";
+import { Doc } from "../../convex/_generated/dataModel";
 
 
 const formSchema = z.object({
@@ -61,18 +62,27 @@ export function UploadButton() {
 
         const postUrl = await generateUploadUrl();
 
+        const fileType = values.file[0].type;
+
         const result = await fetch(postUrl, {
             method: "POST",
-            headers: { "Content-Type": values.file[0].type },
+            headers: { "Content-Type": fileType },
             body: values.file[0],
         });
         const { storageId } = await result.json()
+
+        const types = {
+            "image/png": "image",
+            "application/pdf": "pdf",
+            "test/csv": "csv",
+        } as Record<string, Doc<"files">["type"]>;
 
         try {
             await createFile({
                 name: values.title,
                 fileId: storageId,
-                orgId
+                orgId,
+                type: types[fileType],
             });
 
             form.reset();
@@ -84,6 +94,7 @@ export function UploadButton() {
                 description: "Now everyone can view your file",
                 className: "bg-purple-400 text-black"
             })
+
         } catch (err) {
             toast({
                 variant: "default",

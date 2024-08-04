@@ -22,7 +22,7 @@ export default function Home() {
 
   const files = useQuery(api.files.getFiles,
     orgId ? { orgId } : "skip");
-    const isLoading = files === undefined
+  const isLoading = files === undefined
 
 
   return (
@@ -59,7 +59,6 @@ export default function Home() {
           </div>
         </>
       )}
-
 
     </main >
   );
